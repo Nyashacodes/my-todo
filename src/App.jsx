@@ -10,7 +10,7 @@ function App() {
   const [editingTodo, setEditingTodo] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/todos")
+    fetch("https://my-todo-uo0m.onrender.com/todos")
       .then((res) => res.json())
       .then((data) => setTodos(data))
       .catch((err) => console.log(err));
@@ -28,7 +28,7 @@ function App() {
 
   const handleDelete = async (id) => {
     console.log("Deleting todo with id:", id);
-    await fetch(`http://localhost:5000/todos/${id}`, {
+    await fetch(`https://my-todo-uo0m.onrender.com/todos/${id}`, {
       method: "DELETE",
     });
 

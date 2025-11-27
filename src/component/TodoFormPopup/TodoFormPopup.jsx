@@ -30,7 +30,7 @@ function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
     // ⭐ EDIT mode
     if (editingTodo) {
       const res = await fetch(
-        `http://localhost:5000/todos/${editingTodo._id}`,
+        `https://my-todo-uo0m.onrender.com/todos/${editingTodo._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -49,7 +49,7 @@ function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
     }
 
     // ⭐ ADD mode
-    const res = await fetch("http://localhost:5000/todos", {
+    const res = await fetch("https://my-todo-uo0m.onrender.com/todos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newTodo),
