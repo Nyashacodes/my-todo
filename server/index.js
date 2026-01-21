@@ -28,6 +28,9 @@ const TodoSchema = new mongoose.Schema({
   task: String,
   priority: String,
   dueDate: Date,
+  percentage: Number,
+  notes: String,
+  userEmail: String,
   createdOn: {
     type: Date,
     default: Date.now,
@@ -38,7 +41,18 @@ const Todo = mongoose.model("Todo", TodoSchema);
 
 // Get todos
 app.get("/todos", async (req, res) => {
-  const todos = await Todo.find();
+  const { userEmail } = req.query;
+  if (!userEmail) {
+    return res.json([]);
+  }
+
+  // ⭐ Admin Logic
+  if (userEmail === "admin@test.com") {
+    const allTodos = await Todo.find();
+    return res.json(allTodos);
+  }
+
+  const todos = await Todo.find({ userEmail });
   res.json(todos);
 });
 

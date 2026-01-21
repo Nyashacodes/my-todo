@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from "react";
 import "./todoFormPopup.css";
-function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
+} from "@mui/material";
+
+function TodoFormPopup({ onClose, todos, setTodos, editingTodo, userEmail }) {
   const [task, setTask] = useState("");
   const [priority, setPriority] = useState("Low");
   const [dueDate, setDueDate] = useState("");
+  const [percentage, setPercentage] = useState(0);
+  const [notes, setNotes] = useState("");
+
+  // State for error popup
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // ⭐ Prefill form if editing
   useEffect(() => {
@@ -11,18 +26,48 @@ function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
       setTask(editingTodo.task);
       setPriority(editingTodo.priority);
       setDueDate(editingTodo.dueDate?.slice(0, 10) || "");
+      setPercentage(editingTodo.percentage || "");
+      setNotes(editingTodo.notes || "");
     }
   }, [editingTodo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!task.trim()) return;
+    const missingFields = [];
+    if (!task.trim()) missingFields.push("Task");
+    if (!priority) missingFields.push("Priority");
+    if (!dueDate) missingFields.push("Due Date");
+
+    if (missingFields.length > 0) {
+      setErrorMessage(`Please fill: ${missingFields.join(", ")}`);
+      setErrorOpen(true);
+      return;
+    }
+
+    // ⭐ Validation
+    if (dueDate) {
+      const today = new Date().toISOString().slice(0, 10);
+      if (dueDate < today) {
+        setErrorMessage("Due date cannot be in the past!");
+        setErrorOpen(true);
+        return;
+      }
+    }
+
+    if (percentage < 0 || percentage > 100) {
+      setErrorMessage("Percentage must be between 0 and 100");
+      setErrorOpen(true);
+      return;
+    }
 
     const newTodo = {
       task,
       priority,
       dueDate,
+      percentage,
+      notes,
+      userEmail, // Add userEmail to the object
       createdOn: Date.now(),
     };
 
@@ -59,6 +104,8 @@ function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
     onClose();
   };
 
+  const today = new Date().toISOString().slice(0, 10);
+
   return (
     <div className="todo-form-popup">
       <h2>{editingTodo ? "Edit Todo" : "Add New Todo Item"}</h2>
@@ -75,22 +122,40 @@ function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
           <label>Priority</label>
           <div>
             <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+            >
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+            </select>
           </div>
-          
+
 
           <label>Due Date</label>
           <input
             type="date"
             value={dueDate}
+            min={today}
             onChange={(e) => setDueDate(e.target.value)}
           />
+
+          <label>Percentage Complete (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={percentage}
+            onChange={(e) => setPercentage(e.target.value)}
+          />
+
+          <label>Notes / Comments</label>
+          <input
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+
         </div>
 
         <div className="todo-form-buttons">
@@ -102,6 +167,28 @@ function TodoFormPopup({ onClose, todos, setTodos, editingTodo }) {
           </button>
         </div>
       </form>
+
+      {/* Error Popup */}
+      <Dialog
+        open={errorOpen}
+        onClose={() => setErrorOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Validation Error"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {errorMessage}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorOpen(false)} autoFocus>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

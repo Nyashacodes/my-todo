@@ -1,3 +1,9 @@
+.todo-form-buttons {
+  display: flex;
+  gap: 15px; /* Adds space between buttons */
+  justify-content: flex-end; /* Aligns buttons to the right, optional */
+  margin-top: 1rem;
+}
 .todo-form-popup {
   position: fixed;
   top: 50%;
